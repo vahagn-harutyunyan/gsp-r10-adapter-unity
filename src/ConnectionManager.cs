@@ -64,7 +64,7 @@ namespace gspro_r10
       {
         try
         {
-          UnityShotMessage unityShot = CreateUnityShotMessage(ballData);
+          UnityBallDataMessage unityShot = CreateUnityBallDataMessage(ballData);
           shotPublisher.Publish(unityShot);
         }
         catch (Exception ex)
@@ -74,38 +74,40 @@ namespace gspro_r10
       }
     }
 
-    private static UnityShotMessage CreateUnityShotMessage(BallData? ballData)
+    private static UnityBallDataMessage CreateUnityBallDataMessage(BallData? ballData)
     {
-      const float MilesPerHourToMetersPerSecond = 0.44704f;
-      const float YardsToMeters = 0.9144f;
-
-      float speedMps = 0f;
-      float launchVertDeg = 0f;
-      float launchHorizDeg = 0f;
-      float spinRpm = 0f;
+      float speedMph = 0f;
+      float hlaDeg = 0f;
+      float vlaDeg = 0f;
+      float totalSpinRpm = 0f;
       float spinAxisDeg = 0f;
-      float carryMeters = 0f;
+      float carryYards = 0f;
+      float backSpinRpm = 0f;
+      float sideSpinRpm = 0f;
 
       if (ballData != null)
       {
-        speedMps = (float)ballData.Speed * MilesPerHourToMetersPerSecond;
-        launchVertDeg = (float)ballData.VLA;
-        launchHorizDeg = (float)ballData.HLA;
-        spinRpm = (float)ballData.TotalSpin;
+        speedMph = (float)ballData.Speed;
+        hlaDeg = (float)ballData.HLA;
+        vlaDeg = (float)ballData.VLA;
+        totalSpinRpm = (float)ballData.TotalSpin;
         spinAxisDeg = (float)ballData.SpinAxis;
-        carryMeters = (float)ballData.CarryDistance * YardsToMeters;
+        carryYards = (float)ballData.CarryDistance;
+        backSpinRpm = (float)ballData.BackSpin;
+        sideSpinRpm = (float)ballData.SideSpin;
       }
 
-      return new UnityShotMessage()
+      return new UnityBallDataMessage()
       {
         UtcUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-        BallSpeedMps = speedMps,
-        LaunchVertDeg = launchVertDeg,
-        LaunchHorizDeg = launchHorizDeg,
-        SpinRpm = spinRpm,
+        SpeedMph = speedMph,
+        HlaDeg = hlaDeg,
+        VlaDeg = vlaDeg,
+        TotalSpinRpm = totalSpinRpm,
         SpinAxisDeg = spinAxisDeg,
-        CarryMeters = carryMeters,
-        TotalMeters = 0f,
+        CarryYards = carryYards,
+        BackSpinRpm = backSpinRpm,
+        SideSpinRpm = sideSpinRpm,
         IsTestShot = false
       };
     }
