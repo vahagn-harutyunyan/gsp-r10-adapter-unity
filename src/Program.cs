@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+using gspro_r10.UnityBroadcast;
+using Microsoft.Extensions.Configuration;
 
 namespace gspro_r10
 {
@@ -23,10 +24,21 @@ namespace gspro_r10
       
       Console.Title = "GSP-R10 Connect";
       BaseLogger.LogMessage("GSP - R10 Bridge starting. Press enter key to close", "Main");
-      ConnectionManager manager = new ConnectionManager(configuration);
+      UnityBroadcastSettings unitySettings = UnityBroadcastSettings.FromConfiguration(configuration.GetSection("unityBroadcast"));
+      IShotPublisher? shotPublisher = null;
+      UnityShotWebSocketBroadcaster? unityBroadcaster = null;
+      if (unitySettings.Enabled)
+      {
+        shotPublisher = new ShotPublisher();
+        unityBroadcaster = new UnityShotWebSocketBroadcaster(shotPublisher, unitySettings);
+        BaseLogger.LogMessage($"Unity broadcast enabled at {unitySettings.WebsocketUrl}", "Unity");
+      }
+
+      ConnectionManager manager = new ConnectionManager(configuration, shotPublisher);
       Console.ReadLine();
       BaseLogger.LogMessage("Shutting down...", "Main");
       manager.Dispose();
+      unityBroadcaster?.Dispose();
       BaseLogger.LogMessage("Exiting...", "Main");
     }
   }

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using gspro_r10.OpenConnect;
+using gspro_r10.UnityBroadcast;
 using Microsoft.Extensions.Configuration;
 
 namespace gspro_r10
@@ -11,6 +12,7 @@ namespace gspro_r10
     private OpenConnectClient OpenConnectClient;
     private BluetoothConnection? BluetoothConnection { get; }
     internal HttpPuttingServer? PuttingConnection { get; }
+    private readonly IShotPublisher? shotPublisher;
     public event ClubChangedEventHandler? ClubChanged;
     public delegate void ClubChangedEventHandler(object sender, ClubChangedEventArgs e);
     public class ClubChangedEventArgs: EventArgs
@@ -26,8 +28,9 @@ namespace gspro_r10
     private int shotNumber = 0;
     private bool disposedValue;
 
-    public ConnectionManager(IConfigurationRoot configuration)
+    public ConnectionManager(IConfigurationRoot configuration, IShotPublisher? shotPublisher = null)
     {
+      this.shotPublisher = shotPublisher;
       OpenConnectClient = new OpenConnectClient(this, configuration.GetSection("openConnect"));
       OpenConnectClient.ConnectAsync();
 
@@ -47,7 +50,7 @@ namespace gspro_r10
       }
     }
 
-    internal void SendShot(OpenConnect.BallData? ballData, OpenConnect.ClubData? clubData)
+    internal void SendShot(BallData? ballData, ClubData? clubData)
     {
       string openConnectMessage = JsonSerializer.Serialize(OpenConnectApiMessage.CreateShotData(
         shotNumber++,
@@ -56,6 +59,55 @@ namespace gspro_r10
       ), serializerSettings);
 
       OpenConnectClient.SendAsync(openConnectMessage);
+
+      if (shotPublisher != null)
+      {
+        try
+        {
+          UnityShotMessage unityShot = CreateUnityShotMessage(ballData);
+          shotPublisher.Publish(unityShot);
+        }
+        catch (Exception ex)
+        {
+          BaseLogger.LogMessage($"Unity broadcast failed: {ex.Message}", "Unity", LogMessageType.Error);
+        }
+      }
+    }
+
+    private static UnityShotMessage CreateUnityShotMessage(BallData? ballData)
+    {
+      const float MilesPerHourToMetersPerSecond = 0.44704f;
+      const float YardsToMeters = 0.9144f;
+
+      float speedMps = 0f;
+      float launchVertDeg = 0f;
+      float launchHorizDeg = 0f;
+      float spinRpm = 0f;
+      float spinAxisDeg = 0f;
+      float carryMeters = 0f;
+
+      if (ballData != null)
+      {
+        speedMps = (float)ballData.Speed * MilesPerHourToMetersPerSecond;
+        launchVertDeg = (float)ballData.VLA;
+        launchHorizDeg = (float)ballData.HLA;
+        spinRpm = (float)ballData.TotalSpin;
+        spinAxisDeg = (float)ballData.SpinAxis;
+        carryMeters = (float)ballData.CarryDistance * YardsToMeters;
+      }
+
+      return new UnityShotMessage()
+      {
+        UtcUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+        BallSpeedMps = speedMps,
+        LaunchVertDeg = launchVertDeg,
+        LaunchHorizDeg = launchHorizDeg,
+        SpinRpm = spinRpm,
+        SpinAxisDeg = spinAxisDeg,
+        CarryMeters = carryMeters,
+        TotalMeters = 0f,
+        IsTestShot = false
+      };
     }
 
     public void ClubUpdate(Club club)
