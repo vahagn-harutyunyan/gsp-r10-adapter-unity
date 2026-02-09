@@ -128,14 +128,14 @@ namespace gspro_r10.UnityBroadcast
     {
       UnityBallDataMessage testShot = new UnityBallDataMessage()
       {
-        SpeedMph = 155.0f,
-        HlaDeg = 1.5f,
-        VlaDeg = 12.8f,
-        TotalSpinRpm = 2600.0f,
-        SpinAxisDeg = -5.0f,
+        SpeedMph = 50.0f,
+        HlaDeg = 15f,
+        VlaDeg = 27.5f,
+        TotalSpinRpm = 0f,
+        SpinAxisDeg = 0f,
         CarryYards = 245.0f,
-        BackSpinRpm = 2450.0f,
-        SideSpinRpm = -220.0f,
+        BackSpinRpm = 0f,
+        SideSpinRpm = 0f,
         IsTestShot = true
       };
 
