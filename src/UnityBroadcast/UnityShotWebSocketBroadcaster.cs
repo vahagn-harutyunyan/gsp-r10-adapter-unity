@@ -128,7 +128,6 @@ namespace gspro_r10.UnityBroadcast
     {
       UnityBallDataMessage testShot = new UnityBallDataMessage()
       {
-        UtcUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
         SpeedMph = 155.0f,
         HlaDeg = 1.5f,
         VlaDeg = 12.8f,
@@ -162,13 +161,8 @@ namespace gspro_r10.UnityBroadcast
     {
       try
       {
-        string shotType = "n/a";
-        string strength01 = "n/a";
-        string curveBias = "n/a";
-        string seed = "n/a";
-        long timestamp = shot.UtcUnixMs != 0 ? shot.UtcUnixMs : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         BaseLogger.LogMessage(
-          $"Unity shot publish ts={timestamp} shotType={shotType} strength01={strength01} speedMph={shot.SpeedMph:F1} hlaDeg={shot.HlaDeg:F1} vlaDeg={shot.VlaDeg:F1} totalSpinRpm={shot.TotalSpinRpm:F0} spinAxisDeg={shot.SpinAxisDeg:F1} carryYards={shot.CarryYards:F1} backSpinRpm={shot.BackSpinRpm:F0} sideSpinRpm={shot.SideSpinRpm:F0} curveBias={curveBias} seed={seed} isTestShot={shot.IsTestShot} clients={clientCount}",
+          $"Unity shot publish speedMph={shot.SpeedMph:F1} hlaDeg={shot.HlaDeg:F1} vlaDeg={shot.VlaDeg:F1} totalSpinRpm={shot.TotalSpinRpm:F0} spinAxisDeg={shot.SpinAxisDeg:F1} carryYards={shot.CarryYards:F1} backSpinRpm={shot.BackSpinRpm:F0} sideSpinRpm={shot.SideSpinRpm:F0} isTestShot={shot.IsTestShot} clients={clientCount}",
           "Unity");
       }
       catch (Exception ex)

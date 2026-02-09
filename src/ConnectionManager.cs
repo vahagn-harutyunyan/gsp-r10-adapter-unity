@@ -99,7 +99,6 @@ namespace gspro_r10
 
       return new UnityBallDataMessage()
       {
-        UtcUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
         SpeedMph = speedMph,
         HlaDeg = hlaDeg,
         VlaDeg = vlaDeg,

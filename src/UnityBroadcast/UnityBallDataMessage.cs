@@ -2,7 +2,6 @@ namespace gspro_r10.UnityBroadcast
 {
   public class UnityBallDataMessage
   {
-    public long UtcUnixMs { get; set; }
     public float SpeedMph { get; set; }
     public float HlaDeg { get; set; }
     public float VlaDeg { get; set; }
